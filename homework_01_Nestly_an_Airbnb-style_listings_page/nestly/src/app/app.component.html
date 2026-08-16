@@ -1,0 +1,61 @@
+<app-navbar />
+
+<main>
+
+  <h1>Find your next stay</h1>
+
+  <p>
+    Discover places that feel like home.
+  </p>
+
+  <button
+    mat-stroked-button
+    (click)="toggleSuperhosts()"
+  >
+
+    <mat-icon>verified</mat-icon>
+
+    @if (showSuperhostsOnly()) {
+      Show all stays
+    } @else {
+      Show superhosts only
+    }
+
+  </button>
+
+
+  @if (filteredStays().length === 0) {
+
+    <div class="empty">
+
+      <mat-icon>home</mat-icon>
+
+      <h2>No stays found</h2>
+
+      <p>
+        There are no Superhost stays available.
+      </p>
+
+    </div>
+
+  } @else {
+
+    <section class="stay-grid">
+
+      @for (stay of filteredStays(); track stay.id) {
+
+        <app-stay-card
+          [stay]="stay"
+          (favorited)="onFavorited($event)"
+          appHighlightCard
+        />
+
+      }
+
+    </section>
+
+  }
+
+</main>
+
+<app-footer />

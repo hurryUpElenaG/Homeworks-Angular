@@ -1,5 +1,5 @@
 import { CurrencyPipe } from '@angular/common';
-import { Component, input, output, signal } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 
@@ -24,30 +24,15 @@ import { CardShellComponent } from '../card-shell/card-shell.component';
 })
 export class StayCardComponent {
 
-  // Receives the stay from AppComponent
   stay = input.required<Stay>();
 
-  // Sends the favorite information to AppComponent
-  favorited = output<{
-    id: number;
-    favorited: boolean;
-  }>();
+  // Parent tells the card whether this stay is favorited
+  favorite = input(false);
 
-  // Local favorite state for this card
-  isFavorited = signal(false);
+  // Child tells parent that the favorite button was clicked
+  favorited = output<number>();
 
   toggleFavorite() {
-    this.isFavorited.update(value => !value);
-
-    this.favorited.emit({
-      id: this.stay().id,
-      favorited: this.isFavorited(),
-    });
-  }
-
-  favoriteIcon() {
-    return this.isFavorited()
-      ? 'favorite'
-      : 'favorite_border';
+    this.favorited.emit(this.stay().id);
   }
 }

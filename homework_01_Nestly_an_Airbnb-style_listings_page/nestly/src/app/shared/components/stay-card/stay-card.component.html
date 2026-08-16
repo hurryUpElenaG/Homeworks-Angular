@@ -2,21 +2,13 @@
 
   <div class="image-container">
 
-    <img
-      [src]="stay().image"
-      [alt]="stay().title"
-    >
+    <img [src]="stay().image" [alt]="stay().title">
 
-    <button
-      mat-icon-button
-      class="favorite"
-      (click)="toggleFavorite()"
-      [attr.aria-label]="
-        isFavorited() ? 'Remove from favorites' : 'Add to favorites'
-      "
-    >
+    <button mat-icon-button class="favorite" (click)="toggleFavorite()" [attr.aria-label]="
+        favorite() ? 'Remove from favorites' : 'Add to favorites'
+      ">
       <mat-icon>
-        {{ favoriteIcon() }}
+        {{ favorite() ? 'favorite' : 'favorite_border' }}
       </mat-icon>
     </button>
 
@@ -29,9 +21,9 @@
     <p>{{ stay().location }}</p>
 
     @if (stay().superhost) {
-      <app-badge>
-        Superhost
-      </app-badge>
+    <app-badge>
+      Superhost
+    </app-badge>
     }
 
     <app-badge>

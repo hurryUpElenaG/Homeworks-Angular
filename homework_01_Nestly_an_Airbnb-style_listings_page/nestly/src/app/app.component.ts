@@ -24,9 +24,7 @@ import { FooterComponent } from './shared/components/footer/footer.component';
 })
 export class AppComponent {
 
-  // Hardcoded stays
   stays: Stay[] = [
-
     {
       id: 1,
       title: 'Cozy Mountain Cabin',
@@ -38,7 +36,6 @@ export class AppComponent {
       description:
         'A cozy cabin surrounded by nature, perfect for a peaceful mountain weekend.',
     },
-
     {
       id: 2,
       title: 'Lake View Apartment',
@@ -50,7 +47,6 @@ export class AppComponent {
       description:
         'A comfortable apartment with a beautiful view of Lake Ohrid and the old town.',
     },
-
     {
       id: 3,
       title: 'Modern City Apartment',
@@ -62,7 +58,6 @@ export class AppComponent {
       description:
         'A modern apartment close to restaurants, shops and the city center.',
     },
-
     {
       id: 4,
       title: 'Countryside House',
@@ -74,7 +69,6 @@ export class AppComponent {
       description:
         'A quiet countryside house with a garden and beautiful mountain views.',
     },
-
     {
       id: 5,
       title: 'Vineyard Villa',
@@ -86,7 +80,6 @@ export class AppComponent {
       description:
         'A spacious villa surrounded by vineyards, ideal for a relaxing getaway.',
     },
-
     {
       id: 6,
       title: 'Forest Retreat',
@@ -98,13 +91,14 @@ export class AppComponent {
       description:
         'A peaceful forest retreat where you can enjoy fresh air and beautiful scenery.',
     },
-
   ];
 
-  // Controls whether we show only Superhosts
+  // Controls the Superhost filter
   showSuperhostsOnly = signal(false);
 
-  // Creates the list that will be displayed
+  // Parent owns the favorite state
+  favoriteIds = signal<number[]>([]);
+
   filteredStays = computed(() => {
 
     if (this.showSuperhostsOnly()) {
@@ -114,18 +108,23 @@ export class AppComponent {
     return this.stays;
   });
 
-  // Toggle the Superhost filter
   toggleSuperhosts() {
     this.showSuperhostsOnly.update(value => !value);
   }
 
-  // Receives the event from StayCard
-  onFavorited(event: {
-    id: number;
-    favorited: boolean;
-  }) {
+  toggleFavorite(stayId: number) {
 
-    console.log('Favorite changed:', event);
+    this.favoriteIds.update(ids => {
 
+      if (ids.includes(stayId)) {
+        return ids.filter(id => id !== stayId);
+      }
+
+      return [...ids, stayId];
+    });
+  }
+
+  isFavorite(stayId: number) {
+    return this.favoriteIds().includes(stayId);
   }
 }

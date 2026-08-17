@@ -9,11 +9,28 @@ main {
   margin-top: 20px;
 }
 
-.highlighted {
-  box-shadow: 0 0 8px #999;
+app-stay-card {
+  display: block;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  transition: 0.2s;
+}
+
+/*hover effect pipe*/
+app-stay-card:hover {
+  background-color: #f3f7ff;
+  border: 2px solid #d65fcc;
+  box-shadow: 0 0 8px #ccc;
+}
+
+app-stay-card.highlighted {
+  background-color: #f3f7ff;
+  border: 2px solid #d65fcc;
+  box-shadow: 0 0 8px #ccc;
 }
 
 .empty {
   text-align: center;
   padding: 40px;
 }
+

@@ -1,0 +1,36 @@
+main {
+  padding: 20px;
+}
+
+.stay-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-top: 20px;
+}
+
+app-stay-card {
+  display: block;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  transition: 0.2s;
+}
+
+/*hover effect pipe*/
+app-stay-card:hover {
+  background-color: #f3f7ff;
+  border: 2px solid #d65fcc;
+  box-shadow: 0 0 8px #ccc;
+}
+
+app-stay-card.highlighted {
+  background-color: #f3f7ff;
+  border: 2px solid #d65fcc;
+  box-shadow: 0 0 8px #ccc;
+}
+
+.empty {
+  text-align: center;
+  padding: 40px;
+}
+

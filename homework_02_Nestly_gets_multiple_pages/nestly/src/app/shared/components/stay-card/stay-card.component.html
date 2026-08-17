@@ -1,0 +1,44 @@
+<app-card-shell>
+
+  <div class="image-container">
+
+    <img [src]="stay().image" [alt]="stay().title">
+
+    <button mat-icon-button class="favorite" (click)="toggleFavorite()" [attr.aria-label]="
+        favorite() ? 'Remove from favorites' : 'Add to favorites'
+      ">
+      <mat-icon>
+        {{ favorite() ? 'favorite' : 'favorite_border' }}
+      </mat-icon>
+    </button>
+
+  </div>
+
+  <div class="content">
+
+    <h2>{{ stay().title }}</h2>
+
+    <p>{{ stay().location }}</p>
+
+    @if (stay().superhost) {
+    <app-badge>
+      Superhost
+    </app-badge>
+    }
+
+    <app-badge>
+      ★ {{ stay().rating }}
+    </app-badge>
+
+    <p>
+      {{ stay().description | truncate:60 }}
+    </p>
+
+    <strong>
+      {{ stay().pricePerNight | currency:'EUR':'symbol':'1.0-0' }}
+      / night
+    </strong>
+
+  </div>
+
+</app-card-shell>

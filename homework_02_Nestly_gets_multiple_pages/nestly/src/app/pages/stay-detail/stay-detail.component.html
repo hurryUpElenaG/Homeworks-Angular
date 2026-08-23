@@ -1,0 +1,128 @@
+<section class="detail-page">
+
+  <a
+    mat-button
+    routerLink="/"
+    class="back-link"
+  >
+    <mat-icon>arrow_back</mat-icon>
+    Back to stays
+  </a>
+
+  @if (stay) {
+
+    <article class="stay-detail">
+
+      <div class="detail-image-wrapper">
+        <img
+          class="detail-image"
+          [src]="stay.image"
+          [alt]="stay.title"
+        />
+
+        @if (stay.superhost) {
+          <div class="superhost-badge">
+            <mat-icon>verified</mat-icon>
+            Superhost
+          </div>
+        }
+      </div>
+
+      <div class="detail-content">
+
+        <div class="detail-header">
+
+          <div>
+            <h1>{{ stay.title }}</h1>
+
+            <p class="location">
+              <mat-icon>location_on</mat-icon>
+              {{ stay.location }}
+            </p>
+          </div>
+
+          <button
+            mat-icon-button
+            type="button"
+            [class.favorite-active]="isFavorite()"
+            (click)="toggleFavorite()"
+            [attr.aria-label]="
+              isFavorite()
+                ? 'Remove from favorites'
+                : 'Add to favorites'
+            "
+          >
+            <mat-icon>
+              {{
+                isFavorite()
+                  ? 'favorite'
+                  : 'favorite_border'
+              }}
+            </mat-icon>
+          </button>
+
+        </div>
+
+        <div class="rating">
+          <mat-icon>star</mat-icon>
+          <strong>{{ stay.rating }}</strong>
+          <span>Rating</span>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <section class="description">
+          <h2>About this stay</h2>
+
+          <p>
+            {{ stay.description }}
+          </p>
+        </section>
+
+        <div class="price-card">
+
+          <div>
+            <strong>€{{ stay.pricePerNight }}</strong>
+            <span> / night</span>
+          </div>
+
+          <button
+            mat-flat-button
+            color="primary"
+            routerLink="/"
+          >
+            Explore more stays
+          </button>
+
+        </div>
+
+      </div>
+
+    </article>
+
+  } @else {
+
+    <div class="not-found-state">
+
+      <mat-icon>search_off</mat-icon>
+
+      <h1>Stay not found</h1>
+
+      <p>
+        Sorry, we couldn't find a stay with ID
+        {{ stayId }}.
+      </p>
+
+      <a
+        mat-flat-button
+        color="primary"
+        routerLink="/"
+      >
+        Back to stays
+      </a>
+
+    </div>
+
+  }
+
+</section>

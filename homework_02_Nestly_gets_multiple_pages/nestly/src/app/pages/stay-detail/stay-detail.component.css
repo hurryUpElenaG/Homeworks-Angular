@@ -1,0 +1,170 @@
+.detail-page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.back-link {
+  margin-bottom: 24px;
+}
+
+.stay-detail {
+  overflow: hidden;
+  border: 1px solid #e0e0e0;
+  border-radius: 20px;
+  background: #fff;
+}
+
+.detail-image-wrapper {
+  position: relative;
+}
+
+.detail-image {
+  display: block;
+  width: 100%;
+  height: 480px;
+  object-fit: cover;
+}
+
+.superhost-badge {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  padding: 8px 14px;
+
+  border-radius: 999px;
+
+  background: #fff;
+  font-weight: 600;
+}
+
+.detail-content {
+  padding: 32px;
+}
+
+.detail-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.detail-header h1 {
+  margin: 0 0 10px;
+  font-size: 32px;
+}
+
+.location {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  margin: 0;
+
+  color: #666;
+}
+
+.rating {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  margin: 24px 0;
+}
+
+.rating mat-icon {
+  font-size: 20px;
+}
+
+.description {
+  margin: 28px 0;
+}
+
+.description h2 {
+  margin-bottom: 12px;
+}
+
+.description p {
+  line-height: 1.7;
+  color: #555;
+}
+
+.price-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+
+  margin-top: 30px;
+  padding: 20px;
+
+  border: 1px solid #e0e0e0;
+  border-radius: 14px;
+}
+
+.price-card strong {
+  font-size: 28px;
+}
+
+.price-card span {
+  color: #666;
+}
+
+.favorite-active {
+  color: #e53935;
+}
+
+.not-found-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 500px;
+
+  text-align: center;
+}
+
+.not-found-state mat-icon {
+  width: 48px;
+  height: 48px;
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.not-found-state h1 {
+  margin-bottom: 8px;
+}
+
+.not-found-state p {
+  margin-bottom: 24px;
+  color: #666;
+}
+
+@media (max-width: 700px) {
+  .detail-page {
+    padding: 16px;
+  }
+
+  .detail-image {
+    height: 300px;
+  }
+
+  .detail-content {
+    padding: 20px;
+  }
+
+  .detail-header {
+    flex-direction: column;
+  }
+
+  .price-card {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

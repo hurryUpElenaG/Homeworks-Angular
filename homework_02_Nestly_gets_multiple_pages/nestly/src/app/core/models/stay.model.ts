@@ -8,3 +8,5 @@ export interface Stay {
   superhost: boolean;
   description: string;
 }
+
+

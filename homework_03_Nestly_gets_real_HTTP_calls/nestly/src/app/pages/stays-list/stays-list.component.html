@@ -1,0 +1,53 @@
+<section class="list-page">
+  <div class="page-header">
+    <div>
+      <h1>Find your perfect stay</h1>
+      <p>Discover beautiful places for your next trip.</p>
+    </div>
+
+    <button
+      mat-stroked-button
+      type="button"
+      (click)="toggleSuperhosts()"
+      [class.active-filter]="showSuperhostsOnly()"
+    >
+      <mat-icon>verified</mat-icon>
+
+      {{
+        showSuperhostsOnly()
+          ? 'Show all stays'
+          : 'Show superhosts only'
+      }}
+    </button>
+  </div>
+
+  @if (filteredStays().length > 0) {
+    <div class="stays-grid">
+      @for (stay of filteredStays(); track stay.id) {
+        <app-stay-card
+          [stay]="stay"
+          [favorite]="isFavorite(stay.id)"
+          (favorited)="toggleFavorite($event)"
+        />
+      }
+    </div>
+  } @else {
+    <div class="empty-state">
+      <mat-icon>search_off</mat-icon>
+
+      <h2>No stays found</h2>
+
+      <p>
+        There are no superhost stays available right now.
+      </p>
+
+      <button
+        mat-flat-button
+        type="button"
+        (click)="toggleSuperhosts()"
+      >
+        Show all stays
+      </button>
+    </div>
+  }
+</section>

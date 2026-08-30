@@ -1,0 +1,57 @@
+<a
+  class="stay-card-link"
+  [routerLink]="['/stays', stay().id]"
+>
+  <app-card-shell appHighlightCard>
+
+    <div class="stay-image-wrapper">
+      <img
+        class="stay-image"
+        [src]="stay().image"
+        [alt]="stay().title"
+      />
+
+      @if (stay().superhost) {
+        <app-badge>
+          Superhost
+        </app-badge>
+      }
+
+      <button
+        mat-icon-button
+        class="favorite-button"
+        type="button"
+        [class.favorite-active]="favorite()"
+        (click)="toggleFavorite(); $event.preventDefault(); $event.stopPropagation()"
+        aria-label="Toggle favorite"
+      >
+        <mat-icon>
+          {{ favorite() ? 'favorite' : 'favorite_border' }}
+        </mat-icon>
+      </button>
+    </div>
+
+    <div class="stay-content">
+      <div class="stay-header">
+        <div>
+          <h2>{{ stay().title }}</h2>
+          <p>{{ stay().location }}</p>
+        </div>
+
+        <span class="rating">
+          ★ {{ stay().rating }}
+        </span>
+      </div>
+
+      <p class="description">
+        {{ stay().description | truncate: 60 }}
+      </p>
+
+      <div class="stay-footer">
+        <strong>{{ stay().pricePerNight | currency:'EUR':'symbol':'1.0-0' }}</strong>
+        <span>night</span>
+      </div>
+    </div>
+
+  </app-card-shell>
+</a>

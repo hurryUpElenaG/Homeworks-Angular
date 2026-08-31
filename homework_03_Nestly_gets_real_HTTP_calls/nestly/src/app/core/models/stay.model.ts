@@ -7,6 +7,7 @@ export interface Stay {
   image: string;
   superhost: boolean;
   description: string;
+  createdAt: string;
 }
 
 

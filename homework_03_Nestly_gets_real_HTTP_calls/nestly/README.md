@@ -1,206 +1,138 @@
-# Nestly
+## Homework 3 — HTTP and API Integration
 
- ## What I changed
-- Added Angular Router configuration in app.routes.ts
-- Added lazy-loaded routes with loadComponent
-  + / → listings
-  + /stays/:id → stay detail
-  + /** → not found
--  Added <router-outlet> to the root component
-- Added Material navigation with:
-  + routerLink
-  + routerLinkActive
-- Moved the stays data into a StaysService with providedIn: 'root'
-- Moved the favorite state into the service so favorites remain consistent between list/detail pages
--  Created:
-  + pages/stays-list
-  + pages/stay-detail
-  + pages/not-found
-- Added ActivatedRoute lookup for stays/:id
-- Added an inline Stay not found state for invalid stay IDs
-- Added View details Material buttons to the existing stay cards
-- Kept your existing:
-  + StayCardComponent
-  + CardShellComponent
-  + BadgeComponent
-  + TruncatePipe
-  + appHighlightCard
-  + Angular Material components
-- Preserved the Superhost filter and favorite functionality
-- Added responsive styling for the listings grid
+Nestly now loads stay data from the Nestly NestJS API instead of using a hardcoded Stay[] array.
 
-##  The most important part
-<router-outlet />
+The Angular application uses:
 
-Think of router-outlet as an empty space where Angular puts the currently selected page.
+- provideHttpClient() in app.config.ts
+- HttpClient inside StaysService
+- typed HTTP responses with HttpClient.get<Stay[]>() and HttpClient.get<Stay>()
+- Observable and subscribe() for HTTP requests
+- loading states while requests are in progress
+- error states when the API cannot be reached
+- 404 handling for missing stays
 
-For example:
+# API
+The Angular application calls:
+http://localhost:3000/api/stays
 
-                    AppComponent
-                         │
-             ┌───────────┴───────────┐
-             │                       │
-          Navbar                 router-outlet
-                                     │
-                    ┌────────────────┼───────────────┐
-                    ↓                ↓               ↓
-                 Home page       Detail page      Not found
+The single-stay endpoint is:
+http://localhost:3000/api/stays/:id
 
-## Our architecture is
-src/
-└── app/
-    │
-    ├── app.component.ts
-    ├── app.component.html
-    ├── app.component.css
-    │
-    ├── app.config.ts
-    ├── app.routes.ts
-    │
-    ├── core/
-    │   ├── models/
-    │   │   └── stay.model.ts
-    │   │
-    │   └── services/
-    │       └── stays.service.ts
-    │
-    ├── pages/
-    │   │
-    │   ├── stays-list/
-    │   │   ├── stays-list.component.ts
-    │   │   ├── stays-list.component.html
-    │   │   └── stays-list.component.css
-    │   │
-    │   ├── stay-detail/
-    │   │   ├── stay-detail.component.ts
-    │   │   ├── stay-detail.component.html
-    │   │   └── stay-detail.component.css
-    │   │
-    │   └── not-found/
-    │       ├── not-found.component.ts
-    │       ├── not-found.component.html
-    │       └── not-found.component.css
-    │
-    └── shared/
-        │
-        ├── components/
-        │   ├── stay-card/
-        │   │   ├── stay-card.component.ts
-        │   │   ├── stay-card.component.html
-        │   │   └── stay-card.component.css
-        │   │
-        │   ├── badge/
-        │   ├── card-shell/
-        │   └── footer/
-        │
-        ├── directives/
-        │   └── highlight-card.directive.ts
-        │
-        └── pipes/
-            └── truncate.pipe.ts
+# Superhost filtering
+For the "Show superhosts only" feature, I chose server-side filtering.
 
-##  Service
-We have two different pages for StaysListComponent and for StayDetailComponent:
+When the filter is enabled, Angular calls:
+GET /api/stays?superhost=true
 
-StaysListComponent
-        │
-        │ needs stays
-        ↓
-   StaysService
-        ↑
-        │ needs stays
-        │
-StayDetailComponent
+instead of downloading all stays and filtering them in the browser.
 
-Both components need access to the same data.
+I chose this approach because the Nestly API already supports the superhost query parameter, so the backend performs the filtering and Angular receives only the stays that are needed.
 
-Why is that useful for favorites?
+# Favorites
+Favorites remain completely client-side and are stored in memory using an Angular signal because the API does not provide a favorites endpoint.
 
-Imagine the user is on:
 
-/stays/1
+## How the finished application works
 
-and clicks the favorite button.
+After everything is changed, the flow is:
 
-The service changes:
+# Home page
+User opens /
+      ↓
+StaysListComponent.ngOnInit()
+      ↓
+loadStays()
+      ↓
+StaysService.getStays()
+      ↓
+HttpClient.get<Stay[]>()
+      ↓
+GET http://localhost:3000/api/stays
+      ↓
+NestJS
+      ↓
+PostgreSQL
+      ↓
+Stay[]
+      ↓
+subscribe()
+      ↓
+this.stays.set(stays)
+      ↓
+@for
+      ↓
+StayCard
 
-favoriteIds
 
-Then the user goes back to:
+# Superhost filter
+User clicks "Show superhosts only"
+             ↓
+showSuperhostsOnly = true
+             ↓
+loadStays()
+             ↓
+getStays({ superhost: true })
+             ↓
+GET /api/stays?superhost=true
+             ↓
+NestJS filters database
+             ↓
+only superhost stays
+             ↓
+Angular displays them
 
-/
+# Detail page
+/stays/3
+   ↓
+ActivatedRoute
+   ↓
+stayId = 3
+   ↓
+StaysService.getStay(3)
+   ↓
+GET /api/stays/3
+   ↓
+NestJS
+   ↓
+PostgreSQL
+   ↓
+Stay
+   ↓
+stay.set(stay)
+   ↓
+detail template
 
-The list page can ask the same service:
-
-isFavorite(1)
-
-and see that the stay is still favorited.
-
-We therefore don't have:
-
-List page
-favoriteIds = [...]
-
-Detail page
-favoriteIds = [...]
-
-which would create two separate states.
-
-Instead:
-
-StaysService
-             /          \
-            /            \
-           ↓              ↓
-       List page      Detail page
-           \              /
-            \            /
-             same state
-
-## Pages
-
-stays-list page:
-
-The flow is
-StaysService
+# Invalid ID
+/stays/999
      ↓
-StaysListComponent
+GET /api/stays/999
      ↓
-StayCardComponent
+NestJS
      ↓
-user clicks favorite
+404
      ↓
-favorited event
+HttpErrorResponse
      ↓
-StaysListComponent
+error.status === 404
      ↓
-StaysService
+notFound = true
      ↓
-favorite state updated
+"Stay not found"
 
-## How the complete application works
+# Server stopped
+Angular
+   ↓
+GET /api/stays
+   ↓
+❌ server unavailable
+   ↓
+error callback
+   ↓
+errorMessage()
+   ↓
+"Something went wrong"
+   ↓
+"Try again"
 
-The final architecture is:
-
-                         Browser
-                            │
-                            ↓
-                      Angular Router
-                            │
-             ┌──────────────┼──────────────┐
-             │              │              │
-             ↓              ↓              ↓
-            "/"       "/stays/:id"      "/**"
-             │              │              │
-             ↓              ↓              ↓
-       StaysList        StayDetail      NotFound
-       Component        Component      Component
-             │              │
-             │              │
-             └──────┬───────┘
-                    ↓
-              StaysService
-                    │
-             ┌──────┴──────┐
-             │             │
-          stays        favoriteIds
+So you won't get a blank page or an endless spinner.

@@ -8,6 +8,12 @@ export const routes: Routes = [
   },
 
   {
+    path: 'host/new',
+    loadComponent: () =>
+      import('./pages/host-new/host-new.component').then((m) => m.HostNewComponent),
+  },
+
+  {
     path: 'stays/:id',
     loadComponent: () =>
       import('./pages/stay-detail/stay-detail.component').then((m) => m.StayDetailComponent),

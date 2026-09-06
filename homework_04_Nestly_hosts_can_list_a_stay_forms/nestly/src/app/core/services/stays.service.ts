@@ -3,6 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 import { Stay } from '../models/stay.model';
+import { NewStay } from '../models/new-stay.model';
 
 @Injectable({
   providedIn: 'root',
@@ -30,9 +31,24 @@ export class StaysService {
     });
   }
 
-
   getStayById(id: number): Observable<Stay> {
     return this.http.get<Stay>(`${this.baseUrl}/${id}`);
+  }
+
+  createStay(stay: NewStay): Observable<Stay> {
+    const requestBody = {
+      title: stay.title,
+      location: stay.location,
+      pricePerNight: stay.pricePerNight,
+      description: stay.description,
+      superhost: stay.superhost,
+
+      // The backend expects "image", not "photos".
+      // We use the first photo as the main image.
+      image: stay.photos[0],
+    };
+
+    return this.http.post<Stay>(this.baseUrl, requestBody);
   }
 
   isFavorite(id: number): boolean {

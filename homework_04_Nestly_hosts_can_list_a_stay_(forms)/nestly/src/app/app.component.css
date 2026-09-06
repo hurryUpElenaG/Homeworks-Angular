@@ -1,0 +1,26 @@
+.app-toolbar {
+  margin-bottom: 20px;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: inherit;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.active-link {
+  font-weight: 700;
+  border-bottom: 2px solid currentColor;
+  border-radius: 0;
+}
+
+main {
+  min-height: calc(100vh - 140px);
+}

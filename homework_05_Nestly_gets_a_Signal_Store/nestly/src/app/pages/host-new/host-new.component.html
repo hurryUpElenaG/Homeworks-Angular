@@ -1,0 +1,195 @@
+<section class="host-page">
+
+  <div class="page-header">
+    <div>
+      <h1>List your stay</h1>
+      <p>
+        Tell guests about your place and make it available on Nestly.
+      </p>
+    </div>
+  </div>
+
+  <mat-card class="form-card">
+    <mat-card-content>
+      <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+
+        <!-- TITLE -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Stay title</mat-label>
+          <input matInput type="text" formControlName="title" placeholder="Cozy apartment near the city center" />
+          <mat-icon matSuffix>home</mat-icon>
+
+          @if (showError(form.get('title'))) {
+          <mat-error>
+            @if (form.get('title')?.hasError('required')) {
+            Title is required.
+            }
+
+            @else if (form.get('title')?.hasError('minlength')) {
+            Title must be at least 5 characters.
+            }
+          </mat-error>
+          }
+        </mat-form-field>
+
+        <!-- LOCATION -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Location</mat-label>
+          <input matInput type="text" formControlName="location" placeholder="Skopje, North Macedonia" />
+          <mat-icon matSuffix>location_on</mat-icon>
+
+          @if (showError(form.get('location'))) {
+          <mat-error>
+            Location is required.
+          </mat-error>
+          }
+        </mat-form-field>
+
+        <!-- PRICE -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Price per night</mat-label>
+          <input matInput type="number" formControlName="pricePerNight" min="10" max="5000" />
+          <mat-icon matSuffix>euro_symbol</mat-icon>
+
+          @if (showError(form.get('pricePerNight'))) {
+          <mat-error>
+            @if (form.get('pricePerNight')?.hasError('required')) {
+            Price is required.
+            }
+            @else if (form.get('pricePerNight')?.hasError('min')) {
+            Price must be at least €10.
+            }
+            @else if (form.get('pricePerNight')?.hasError('max')) {
+            Price cannot be more than €5,000.
+            }
+          </mat-error>
+
+          }
+        </mat-form-field>
+
+        <!-- DESCRIPTION -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Description</mat-label>
+          <textarea matInput formControlName="description" rows="6"
+            placeholder="Describe your stay, the neighborhood and what guests can expect..."></textarea>
+
+          @if (showError(form.get('description'))) {
+          <mat-error>
+            @if (form.get('description')?.hasError('required')) {
+            Description is required.
+            }
+            @else if (form.get('description')?.hasError('minlength')) {
+            Description must be at least 20 characters.
+            }
+          </mat-error>
+          }
+        </mat-form-field>
+
+        <!-- SUPERHOST -->
+        <div class="checkbox-section">
+          <mat-checkbox formControlName="superhost">
+            This stay is hosted by a Superhost
+          </mat-checkbox>
+        </div>
+
+        <!-- PHOTOS -->
+        <section class="photos-section" formArrayName="photos">
+          <div class="section-header">
+            <div>
+              <h2>Photos</h2>
+              <p>
+                Add at least one photo URL.
+              </p>
+            </div>
+
+            <button mat-stroked-button type="button" (click)="addPhoto()">
+              <mat-icon>add</mat-icon>
+              Add photo
+            </button>
+          </div>
+
+          @for (
+          photoControl of photos.controls;
+          track $index;
+          let i = $index
+          ) {
+          <div class="photo-row">
+            <mat-form-field appearance="outline" class="photo-field">
+              <mat-label>
+                Photo URL {{ i + 1 }}
+              </mat-label>
+              <input matInput type="url" [formControlName]="i" placeholder="https://example.com/photo.jpg" />
+              <mat-icon matSuffix>
+                photo
+              </mat-icon>
+
+              @if (showError(photoControl)) {
+              <mat-error>
+                @if (photoControl.hasError('required')) {
+                Photo URL is required.
+                }
+                @else if (photoControl.hasError('invalidUrl')) {
+                Please enter a valid URL starting with
+                http:// or https://.
+                }
+              </mat-error>
+              }
+            </mat-form-field>
+
+            <button mat-icon-button type="button" aria-label="Remove photo" (click)="removePhoto(i)"
+              [disabled]="photos.length === 1">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+          }
+        </section>
+
+        <!-- CROSS-FIELD ERROR -->
+        @if (
+        form.hasError('sameAsTitle') &&
+        (form.get('title')?.touched ||
+        form.get('title')?.dirty ||
+        form.get('location')?.touched ||
+        form.get('location')?.dirty)
+        ) {
+        <div class="group-error">
+          <mat-icon>error_outline</mat-icon>
+          <span>
+            Stay title and location must be different.
+          </span>
+        </div>
+        }
+
+        <!-- SERVER ERROR -->
+        @if (submitError()) {
+        <div class="server-error">
+          <mat-icon>error_outline</mat-icon>
+          <span>
+            {{ submitError() }}
+          </span>
+        </div>
+        }
+
+        <!-- BUTTONS -->
+        <div class="form-actions">
+          <button mat-button type="button" (click)="cancel()" [disabled]="isSubmitting()">
+            Cancel
+          </button>
+
+          <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || isSubmitting()">
+
+            @if (isSubmitting()) {
+            <mat-spinner diameter="20" />
+            <span>Creating...</span>
+            } @else {
+            <ng-container>
+              <mat-icon>add_home</mat-icon>
+              <span>List your stay</span>
+            </ng-container>
+            }
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</section>

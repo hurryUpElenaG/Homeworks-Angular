@@ -1,67 +1,79 @@
-## Homework 4 — Form- List new stay
+## Homework 5 — Signal Store (Nestly get signal store)
 
-I inspected both your Angular project and NestJS server. There is one important backend detail we need to account for:
+How the architecture works now
 
-- Your Angular homework requirement calls the form field photos: string[].
-- Your actual NestJS CreateStayDto accepts image: string, not photos.
-- The Stay model also has image: string.
-- Therefore, the form can use a FormArray of photo URLs as required, but when submitting we should send the first photo URL as image to the existing POST /api/stays endpoint.
-- Your backend also accepts rating optionally, but the homework form doesn't ask the host to enter it, so we can let the server use its default 0.
+Previously your application looked approximately like this:
+
+StaysListComponent
+       │
+       ├── stays
+       ├── isLoading
+       ├── error
+       ├── search
+       ├── superhostOnly
+       │
+       └── StaysService
+                │
+                └── HTTP
+
+Now it becomes:
+
+             StaysListComponent
+                    │
+                    │ reads/calls
+                    ▼
+                StaysStore
+                    │
+       ┌────────────┼─────────────┐
+       │            │             │
+     state       computed       methods
+       │            │             │
+       │         count()      setSearch()
+       │         hasResults() toggleSuperhostOnly()
+       │                         loadStays()
+       │                             │
+       │                             ▼
+       │                       StaysService
+       │                             │
+       │                             ▼
+       │                           HTTP
+       │
+       ├── stays
+       ├── isLoading
+       ├── error
+       ├── search
+       └── superhostOnly
+
+This is the main point of Homework 5.
 
 # Order of completing the task:
-1. Create the custom validators: 
-src/app/core/validators/stay.validators.ts
+1. Install NgRx Signals
+ng add @ngrx/signals
 
-2. Add the NewStay interface
-src/app/core/models/new-stay.model.ts
+2. Create stays.store.ts: 
+src/app/core/store/stays.stores.ts
 
-3. Update StaysService
-src/app/core/services/stays.service.ts
-Add the NewStay import and createStay() method.
+3. Replace stays-list.component.ts
+src/app/pages/stays-list/stays-list.component.ts
+The only remaining local functionality is favorites because your homework specifically moves stays/loading/search/filter into the store. Your existing StaysService still owns the client-side favorite IDs.
 
-Why do we convert photos to image?
+4. Replace stays-list.component.html
+src/app/pages/stays-list/stays-list.component.html
 
-Your homework says:
+The current HTML doesn't have a search box, but Homework 5 specifically requires server-side searching, that is why stays-list.component.html is replaced with new version.
 
-photos: string[];
+5. Update the CSS
+src/app/pages/stays-list/stays-list.component.css
 
-but your actual NestJS DTO says:
+The existing CSS can stay almost exactly the same.
+I would only add styling for the search field and count.
 
-image: string;
+#Bonus
+6. Install store detools
+npm install @angular-architects/ngrx-toolkit  for angular21
 
-So this:
+7. Implement withStaySearch() in stay-search.feature.ts
+src/app/core/stores/stay-search.feature.ts
 
-image: stay.photos[0]
 
-is necessary for your current backend.
 
-For example, the Angular form might contain:
-
-photos: [
-  'https://picsum.photos/600/400',
-  'https://picsum.photos/601/400'
-]
-
-but the POST request becomes:
-
-{
-  "title": "Beautiful Apartment",
-  "location": "Skopje",
-  "pricePerNight": 80,
-  "description": "A beautiful apartment close to the city center.",
-  "superhost": true,
-  "image": "https://picsum.photos/600/400"
-}
-
-That matches your actual CreateStayDto.
-
-4. Create the host form component
-src/app/pages/host-new/
-host-new.component.ts
-host-new.component.html
-host-new.component.css
-
-5. Add the /host/new route in  app.routes.ts
-
-6. Add "List your stay" to your existing navbar
-Your current app.component.html is actually acting as your navbar

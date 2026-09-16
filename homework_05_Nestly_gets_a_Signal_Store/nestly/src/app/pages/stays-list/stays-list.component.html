@@ -2,61 +2,106 @@
   <div class="page-header">
     <div>
       <h1>Find your perfect stay</h1>
-      <p>Discover beautiful places for your next trip.</p>
+
+      <p>
+        Discover beautiful places for your next trip.
+      </p>
     </div>
 
-    <button mat-stroked-button type="button" (click)="toggleSuperhosts()" [class.active-filter]="showSuperhostsOnly()"
-      [disabled]="isLoading()">
+    <button
+      mat-stroked-button
+      type="button"
+      (click)="store.toggleSuperhostOnly()"
+      [class.active-filter]="store.superhostOnly()"
+      [disabled]="store.isLoading()"
+    >
       <mat-icon>verified</mat-icon>
       {{
-      showSuperhostsOnly()
-      ? 'Show all stays'
-      : 'Show superhosts only'
+        store.superhostOnly()
+          ? 'Show all stays'
+          : 'Show superhosts only'
       }}
     </button>
   </div>
 
-  @if (isLoading()) {
-  <div class="empty-state">
-    <mat-icon>hourglass_empty</mat-icon>
-    <h2>Loading stays...</h2>
-    <p>
-      Please wait while we load the available stays.
-    </p>
-  </div>
-  } @else if (errorMessage()) {
-  <div class="empty-state">
-    <mat-icon>error_outline</mat-icon>
-    <h2>Something went wrong</h2>
-    <p>
-      {{ errorMessage() }}
-    </p>
-    <button mat-flat-button color="primary" type="button" (click)="loadStays()">
-      Try again
-    </button>
-  </div>
-  } @else if (filteredStays().length > 0) {
-  <div class="stays-grid">
-    @for (stay of filteredStays(); track stay.id) {
-    <app-stay-card [stay]="stay" [favorite]="isFavorite(stay.id)" (favorited)="toggleFavorite($event)" />
-    }
+  <div class="search-box">
+    <mat-form-field appearance="outline">
+      <mat-label>Search stays</mat-label>
+      <input
+        matInput
+        type="text"
+        [ngModel]="store.search()"
+        (ngModelChange)="store.setSearch($event)"
+        placeholder="Search by title or location"
+      />
+
+      @if (store.search()) {
+        <button
+          class="clear-search-button"
+          mat-icon-button
+          matSuffix
+          type="button"
+          aria-label="Clear search"
+          (click)="store.setSearch('')"
+        >
+          <mat-icon>close</mat-icon>
+        </button>
+      }
+    </mat-form-field>
   </div>
 
-  } @else {
-  <div class="empty-state">
-    <mat-icon>search_off</mat-icon>
-    <h2>No stays found</h2>
-    <p>
-      There are no superhost stays available right now.
-    </p>
-
-    @if (showSuperhostsOnly()) {
-    <button mat-flat-button type="button" (click)="toggleSuperhosts()">
-      Show all stays
-    </button>
-    }
-  </div>
-
+  @if (store.isLoading()) {
+    <div class="empty-state">
+      <mat-icon>hourglass_empty</mat-icon>
+      <h2>Loading stays...</h2>
+      <p>
+        Please wait while we load the available stays.
+      </p>
+    </div>
   }
+  @else if (store.error()) {
+    <div class="empty-state">
+      <mat-icon>error_outline</mat-icon>
+      <h2>Something went wrong</h2>
+      <p>
+        {{ store.error() }}
+      </p>
+    </div>
+  }
+  @else if (store.hasResults()) {
+    <p class="results-count">
+      {{ store.count() }}
+      {{ store.count() === 1 ? 'stay' : 'stays' }}
+      found
+    </p>
 
+    <div class="stays-grid">
+      @for (stay of store.stays(); track stay.id) {
+        <app-stay-card
+          [stay]="stay"
+          [favorite]="isFavorite(stay.id)"
+          (favorited)="toggleFavorite($event)"
+        />
+      }
+    </div>
+  }
+  @else {
+    <div class="empty-state">
+      <mat-icon>search_off</mat-icon>
+      <h2>No stays found</h2>
+      <p>
+        Try changing your search or filter.
+      </p>
+
+      @if (store.superhostOnly() || store.search()) {
+        <button
+          mat-flat-button
+          type="button"
+          (click)="store.setSearch('')"
+        >
+          Clear search
+        </button>
+      }
+    </div>
+  }
 </section>

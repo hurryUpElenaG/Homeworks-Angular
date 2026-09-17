@@ -1,6 +1,6 @@
 ## Homework 5 — Signal Store (Nestly get signal store)
 
-How the architecture works now
+# How the architecture works now without Bonus:
 
 Previously your application looked approximately like this:
 
@@ -45,6 +45,79 @@ Now it becomes:
        └── superhostOnly
 
 This is the main point of Homework 5.
+
+# How architecture works with Bonus
+        StaysListComponent
+            │
+            │ reads/calls
+            ▼
+          StaysStore stays.store.ts
+            │
+            ├── withState()
+            │     ├── stays
+            │     ├── isLoading
+            │     └── error
+            │
+            ├── withStaySearch()  is essentially a reusable piece of SignalStore functionality.
+            │     │
+            │     ├── search
+            │     ├── superhostOnly
+            │     ├── query
+            │     ├── setSearch()
+            │     └── toggleSuperhostOnly()
+            │
+            ├── withComputed()
+            │     ├── count
+            │     └── hasResults
+            │
+            ├── withMethods()
+            │     └── loadStays()
+            │
+            ├── withDevtools()
+            │
+            └── withHooks()
+                  └── initial load
+
+            
+            
+            stay-search.feature.ts
+            │
+            └── withStaySearch()
+
+
+
+## Why providedIn: 'root' matters
+
+This:
+
+export const StaysStore = signalStore(
+  { providedIn: 'root' },
+
+means Angular provides one root-level instance of the store.
+
+For example:
+
+Home page
+   ↓
+StaysStore
+   ↓
+stays loaded
+
+Navigate → Stay Details
+
+Navigate ← Home page
+
+StaysStore
+   ↓
+same store instance
+   ↓
+previous stays still exist
+
+The component itself can be destroyed when you navigate away.
+
+But the root store isn't destroyed just because the page component disappears.
+
+That's why the stays state can survive navigation.
 
 # Order of completing the task:
 1. Install NgRx Signals

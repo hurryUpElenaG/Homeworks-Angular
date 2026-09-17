@@ -35,6 +35,7 @@ export const StaysStore = signalStore(
     error: null,
   }),
 
+  // Bonus: search, superhostOnly, query, setSearch() and toggleSuperhostOnly() are provided by this feature.
   withStaySearch(),
 
   withComputed((state) => ({
@@ -88,6 +89,7 @@ export const StaysStore = signalStore(
   // Keep DevTools
   withDevtools('Nestly Stays Store'),
 
+  // Initial loading
   withHooks({
     onInit(store) {
       store.loadStays(store.query);

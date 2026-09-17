@@ -85,6 +85,45 @@ This is the main point of Homework 5.
             └── withStaySearch()
 
 
+## "What does your StaysStore do?"
+
+You could explain it like this:
+
+"StaysStore is a root-level Signal Store that manages all the state needed by the stays list. withState stores the stays, loading state and error. withStaySearch provides the search and superhost filter state. withComputed creates derived values such as the number of stays and whether results exist. withMethods defines loadStays, which uses rxMethod and the StaysService to load data from the backend. patchState is used for every state update. withHooks calls loadStays when the store initializes, and because loadStays receives the reactive query signal, it reloads when the search or superhost filter changes. withDevtools allows the store state to be inspected during development."
+
+The easiest mental model
+
+Think of your store as a central manager:
+
+                 StaysStore
+                     │
+       ┌─────────────┼─────────────┐
+       │             │             │
+     DATA          FILTERS       ACTIONS
+       │             │             │
+    stays          search       loadStays()
+    loading        superhost
+    error          query
+       │             │             │
+       └─────────────┼─────────────┘
+                     │
+                     ▼
+                Angular HTML
+
+And the four main NgRx concepts are:
+
+Concept	                Simple meaning
+withState()	            What data do I store?
+withComputed()	        What can I calculate from the data?
+withMethods()	          What can my store do?
+rxMethod()	            How do I handle reactive/async operations such as HTTP?
+withHooks()	            What should happen when the store starts?
+patchState()	          How do I change the state?
+withStaySearch()	      Can I extract search/filter logic into a reusable feature?
+withDevtools()	        How can I inspect the store while developing?
+
+The single most important distinction to remember is: withState holds the source data, withComputed calculates values from that data, and withMethods changes/works with the data. patchState is the mechanism used to perform those state changes.
+
 
 ## Why providedIn: 'root' matters
 

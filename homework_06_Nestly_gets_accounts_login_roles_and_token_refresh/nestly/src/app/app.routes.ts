@@ -1,5 +1,8 @@
 import { Routes } from '@angular/router';
 
+import { authGuard } from './core/guards/auth.guard';
+import { adminGuard } from './core/guards/admin.guard';
+
 export const routes: Routes = [
   {
     path: '',
@@ -8,9 +11,34 @@ export const routes: Routes = [
   },
 
   {
+    path: 'login',
+    loadComponent: () => import('./pages/login/login.component').then((m) => m.LoginComponent),
+  },
+
+  {
+    path: 'register',
+    loadComponent: () =>
+      import('./pages/register/register.component').then((m) => m.RegisterComponent),
+  },
+
+  {
     path: 'host/new',
+    canActivate: [authGuard],
     loadComponent: () =>
       import('./pages/host-new/host-new.component').then((m) => m.HostNewComponent),
+  },
+
+  {
+    path: 'admin',
+    canActivate: [authGuard, adminGuard],
+    loadComponent: () => import('./pages/admin/admin.component').then((m) => m.AdminComponent),
+  },
+
+  {
+    path: 'not-allowed',
+
+    loadComponent: () =>
+      import('./pages/not-allowed/not-allowed.component').then((m) => m.NotAllowedComponent),
   },
 
   {

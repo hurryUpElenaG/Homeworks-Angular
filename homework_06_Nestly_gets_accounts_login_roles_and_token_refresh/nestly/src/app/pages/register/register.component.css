@@ -1,0 +1,18 @@
+.auth-page {
+  max-width: 450px;
+  margin: 40px auto;
+}
+
+mat-form-field {
+  width: 100%;
+  margin-bottom: 12px;
+}
+
+button {
+  width: 100%;
+}
+
+.server-error {
+  margin-bottom: 16px;
+  color: #b00020;
+}

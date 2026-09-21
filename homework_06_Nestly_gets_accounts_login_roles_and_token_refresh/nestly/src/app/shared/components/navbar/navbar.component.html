@@ -1,4 +1,45 @@
 <mat-toolbar>
-  <mat-icon>home</mat-icon>
-  <span>Nestly</span>
+  <a mat-button routerLink="/">
+    <mat-icon>home</mat-icon>
+    Nestly
+  </a>
+
+  <span class="spacer"></span>
+
+  <a mat-button routerLink="/" routerLinkActive="active-link" [routerLinkActiveOptions]="{ exact: true }" >
+    Stays
+  </a>
+
+  @if (store.isLoggedIn()) {
+  <a mat-button routerLink="/host/new">
+    <mat-icon>add_home</mat-icon>
+    List a stay
+  </a>
+
+  @if (store.isAdmin()) {
+  <a mat-button routerLink="/admin">
+    <mat-icon>admin_panel_settings</mat-icon>
+    Admin
+  </a>
+  }
+
+  <span>
+    {{ store.user()?.firstName }}
+  </span>
+
+  <button mat-button type="button" (click)="store.logout()">
+    <mat-icon>logout</mat-icon>
+    Logout
+  </button>
+
+  } @else {
+  <a mat-button routerLink="/login">
+    Login
+  </a>
+
+  <a mat-button routerLink="/register">
+    Register
+  </a>
+
+  }
 </mat-toolbar>

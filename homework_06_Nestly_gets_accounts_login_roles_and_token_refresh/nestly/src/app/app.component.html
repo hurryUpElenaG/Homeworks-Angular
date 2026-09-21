@@ -1,23 +1,4 @@
-<mat-toolbar class="app-toolbar">
-
-  <a class="brand" routerLink="/" aria-label="Nestly home">
-    <mat-icon>home</mat-icon>
-    <span>Nestly</span>
-  </a>
-
-  <span class="spacer"></span>
-
-  <a mat-button routerLink="/" routerLinkActive="active-link" [routerLinkActiveOptions]="{ exact: true }">
-    <mat-icon>home</mat-icon>
-    Home
-  </a>
-
-  <a mat-button color="primary" routerLink="/host/new">
-    <mat-icon>add_home</mat-icon>
-    List your stay
-  </a>
-
-</mat-toolbar>
+<app-navbar />
 
 <main>
   <router-outlet />

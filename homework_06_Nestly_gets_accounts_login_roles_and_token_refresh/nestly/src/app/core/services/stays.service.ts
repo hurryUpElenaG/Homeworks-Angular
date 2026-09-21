@@ -51,6 +51,10 @@ export class StaysService {
     return this.http.post<Stay>(this.baseUrl, requestBody);
   }
 
+  deleteStay(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/${id}`);
+  }
+
   isFavorite(id: number): boolean {
     return this.favoriteIds().includes(id);
   }

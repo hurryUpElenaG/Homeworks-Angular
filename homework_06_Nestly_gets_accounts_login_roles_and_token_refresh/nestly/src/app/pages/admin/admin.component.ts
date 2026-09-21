@@ -14,6 +14,7 @@ import { Stay } from '../../core/models/stay.model';
   imports: [MatButtonModule, MatTableModule],
 
   templateUrl: './admin.component.html',
+  styleUrl: './admin.component.css',
 })
 export class AdminComponent {
   private readonly staysService = inject(StaysService);

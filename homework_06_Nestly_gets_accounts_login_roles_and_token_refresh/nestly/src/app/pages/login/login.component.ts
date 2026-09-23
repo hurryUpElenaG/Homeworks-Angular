@@ -1,8 +1,6 @@
 import { Component, inject } from '@angular/core';
-
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -15,41 +13,41 @@ import { AuthStore } from '../../core/store/auth.store';
 @Component({
   selector: 'app-login',
   standalone: true,
-
   imports: [
     ReactiveFormsModule,
     RouterLink,
-
     MatButtonModule,
     MatCardModule,
     MatFormFieldModule,
     MatInputModule,
     MatProgressSpinnerModule,
   ],
-
   templateUrl: './login.component.html',
   styleUrl: './login.component.css',
 })
 export class LoginComponent {
+  private fb = inject(FormBuilder);
+  private route = inject(ActivatedRoute);
+
   readonly store = inject(AuthStore);
 
-  private readonly fb = inject(FormBuilder);
-
-  readonly form = this.fb.nonNullable.group({
+  form = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
 
     password: ['', [Validators.required]],
   });
 
-  submit(): void {
+  submit() {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
     }
 
-    this.store.login({
-      email: this.form.controls.email.value,
-      password: this.form.controls.password.value,
+    const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') ?? '/';  //Bonus
+
+    this.store.login({                                //Bonus
+      credentials: this.form.getRawValue(),
+      returnUrl,
     });
   }
 }

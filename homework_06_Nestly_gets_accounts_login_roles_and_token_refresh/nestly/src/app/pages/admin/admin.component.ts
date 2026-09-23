@@ -28,6 +28,11 @@ export class AdminComponent {
     this.loadStays();
   }
 
+  //instead of using contructor
+  // ngOnInit() {
+  //   this.loadStays();
+  // }
+
   private loadStays(): void {
     this.staysService.getStays().subscribe({
       next: (stays) => {
@@ -50,9 +55,9 @@ export class AdminComponent {
 
       error: (error: HttpErrorResponse) => {
         if (error.status === 403) {
-          this.error.set("You don't have permission to delete this stay.");
+          this.error.set("You don't have permission");
         } else {
-          this.error.set('Could not delete the stay.');
+          this.error.set('Failed to delete stay');
         }
       },
     });

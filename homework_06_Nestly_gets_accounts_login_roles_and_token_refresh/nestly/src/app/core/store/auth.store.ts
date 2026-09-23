@@ -1,23 +1,16 @@
 import { computed, inject } from '@angular/core';
 import { Router } from '@angular/router';
 
-import {
-  patchState,
-  signalStore,
-  withComputed,
-  withHooks,
-  withMethods,
-  withState,
-} from '@ngrx/signals';
+import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
 
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 
 import { of, pipe } from 'rxjs';
 import { catchError, switchMap, tap } from 'rxjs/operators';
 
-import { Login, Register, LoginResponse, User } from '../models/auth.model';
-
 import { AuthService } from '../services/auth.service';
+
+import { Login, Register, User } from '../models/auth.model';
 
 type AuthState = {
   user: User | null;
@@ -27,72 +20,77 @@ type AuthState = {
   error: string | null;
 };
 
-function getStoredUser(): User | null {
-  const value = localStorage.getItem('nestly_user');
+type LoginRequest = {
+  credentials: Login;
+  returnUrl?: string;
+};
 
-  if (!value) {
-    return null;
+const getInitialState = (): AuthState => {
+  const accessToken = localStorage.getItem('accessToken');
+  const refreshToken = localStorage.getItem('refreshToken');
+  const userJson = localStorage.getItem('user');
+
+  let user: User | null = null;
+
+  if (userJson) {
+    try {
+      user = JSON.parse(userJson) as User;
+    } catch {
+      user = null;
+    }
   }
 
-  try {
-    return JSON.parse(value) as User;
-  } catch {
-    return null;
-  }
-}
-
-function getInitialState(): AuthState {
   return {
-    user: getStoredUser(),
-    accessToken: localStorage.getItem('nestly_access_token'),
-    refreshToken: localStorage.getItem('nestly_refresh_token'),
+    user,
+    accessToken,
+    refreshToken,
     isLoading: false,
     error: null,
   };
-}
+};
 
 export const AuthStore = signalStore(
   { providedIn: 'root' },
 
-  withState<AuthState>(getInitialState()),
+  withState(getInitialState()),
 
-  withComputed((state) => ({
-    isLoggedIn: computed(() => !!state.user()),
+  withComputed((store) => ({
+    isLoggedIn: computed(() => !!store.user()),
 
-    isAdmin: computed(() => state.user()?.role === 'ADMIN'),
+    isAdmin: computed(() => store.user()?.role === 'ADMIN'),
   })),
 
-  withMethods((store, authService = inject(AuthService), router = inject(Router)) => {
-    const saveAuthData = (response: LoginResponse): void => {
+  withMethods((store) => {
+    const authService = inject(AuthService);
+    const router = inject(Router);
+
+    const saveAuthData = (response: { accessToken: string; refreshToken: string; user: User }) => {
       patchState(store, {
         user: response.user,
         accessToken: response.accessToken,
         refreshToken: response.refreshToken,
-        isLoading: false,
-        error: null,
       });
 
-      localStorage.setItem('nestly_access_token', response.accessToken);
-      localStorage.setItem('nestly_refresh_token', response.refreshToken);
-      localStorage.setItem('nestly_user', JSON.stringify(response.user));
+      localStorage.setItem('accessToken', response.accessToken);
+      localStorage.setItem('refreshToken', response.refreshToken);
+      localStorage.setItem('user', JSON.stringify(response.user));
     };
 
-    const clearAuthData = (): void => {
+    const clearAuthData = () => {
       patchState(store, {
         user: null,
         accessToken: null,
         refreshToken: null,
-        isLoading: false,
         error: null,
       });
 
-      localStorage.removeItem('nestly_access_token');
-      localStorage.removeItem('nestly_refresh_token');
-      localStorage.removeItem('nestly_user');
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('user');
     };
 
     return {
-      login: rxMethod<Login>(
+      login: rxMethod<LoginRequest>(
         pipe(
           tap(() => {
             patchState(store, {
@@ -101,18 +99,25 @@ export const AuthStore = signalStore(
             });
           }),
 
-          switchMap((credentials) =>
+          switchMap(({ credentials, returnUrl }) =>
             authService.login(credentials).pipe(
               tap((response) => {
                 saveAuthData(response);
 
-                router.navigate(['/']);
+                patchState(store, {
+                  isLoading: false,
+                  error: null,
+                });
+
+                const destination = returnUrl && returnUrl.startsWith('/') ? returnUrl : '/';
+
+                router.navigateByUrl(destination);
               }),
 
               catchError((error) => {
                 patchState(store, {
                   isLoading: false,
-                  error: error?.error?.message ?? 'Invalid credentials',
+                  error: error.error?.message ?? 'Invalid email or password',
                 });
 
                 return of(null);
@@ -136,13 +141,18 @@ export const AuthStore = signalStore(
               tap((response) => {
                 saveAuthData(response);
 
+                patchState(store, {
+                  isLoading: false,
+                  error: null,
+                });
+
                 router.navigate(['/']);
               }),
 
               catchError((error) => {
                 patchState(store, {
                   isLoading: false,
-                  error: error?.error?.message ?? 'Could not create your account',
+                  error: error.error?.message ?? 'Registration failed',
                 });
 
                 return of(null);
@@ -152,15 +162,15 @@ export const AuthStore = signalStore(
         ),
       ),
 
-      setTokens(response: LoginResponse): void {
+      setTokens: (response: { accessToken: string; refreshToken: string; user: User }) => {
         saveAuthData(response);
       },
 
-      clearAuth(): void {
+      clearAuth: () => {
         clearAuthData();
       },
 
-      logout(): void {
+      logout: () => {
         authService.logout().subscribe({
           next: () => {
             clearAuthData();
@@ -168,23 +178,11 @@ export const AuthStore = signalStore(
           },
 
           error: () => {
-            // Even if the server logout fails,
-            // clear the local authentication state.
             clearAuthData();
             router.navigate(['/login']);
           },
         });
       },
     };
-  }),
-
-  withHooks({
-    onInit(store) {
-      // Authentication data is already restored
-      // from localStorage by getInitialState().
-      //
-      // Nothing else is necessary here.
-      console.log('AuthStore initialized');
-    },
   }),
 );

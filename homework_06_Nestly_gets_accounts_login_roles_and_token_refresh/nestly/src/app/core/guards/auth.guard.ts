@@ -3,7 +3,7 @@ import { CanActivateFn, Router } from '@angular/router';
 
 import { AuthStore } from '../store/auth.store';
 
-export const authGuard: CanActivateFn = () => {
+export const authGuard: CanActivateFn = (route, state) => {
   const store = inject(AuthStore);
   const router = inject(Router);
 
@@ -11,5 +11,9 @@ export const authGuard: CanActivateFn = () => {
     return true;
   }
 
-  return router.createUrlTree(['/login']);
+  return router.createUrlTree(['/login'], {
+    queryParams: {             //For Bonus
+      returnUrl: state.url,    //If the user tries /host/new Angular send them to /login?returnUrl=/host/new
+    },
+  });
 };

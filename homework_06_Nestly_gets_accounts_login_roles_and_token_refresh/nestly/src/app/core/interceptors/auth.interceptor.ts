@@ -1,52 +1,72 @@
-import { inject } from '@angular/core';
-import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
+import {
+  HttpErrorResponse,
+  HttpInterceptorFn,
+} from '@angular/common/http';
 
+import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 
-import { catchError, switchMap, throwError } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
 
-import { AuthStore } from '../store/auth.store';
+import {
+  catchError,
+  finalize,
+  shareReplay,
+  switchMap,
+  tap,
+} from 'rxjs/operators';
+
 import { AuthService } from '../services/auth.service';
+import { AuthStore } from '../store/auth.store';
 
-export const authInterceptor: HttpInterceptorFn = (req, next) => {
+import { LoginResponse } from '../models/auth.model';
+
+let refreshInFlight$: Observable<LoginResponse> | null = null;
+
+export const authInterceptor: HttpInterceptorFn = (
+  request,
+  next,
+) => {
   const store = inject(AuthStore);
   const authService = inject(AuthService);
   const router = inject(Router);
 
-  const isAuthRequest =
-    req.url.endsWith('/auth/login') ||
-    req.url.endsWith('/auth/register') ||
-    req.url.endsWith('/auth/refresh');
+  const url = request.url;
 
-  // Login, register and refresh must not receive the normal Authorization header.
+  // Do not add the access token or refresh these requests.
+  const isAuthRequest =
+    url.includes('/auth/login') ||
+    url.includes('/auth/register') ||
+    url.includes('/auth/refresh');
+
   if (isAuthRequest) {
-    return next(req);
+    return next(request);
   }
 
   const accessToken = store.accessToken();
 
-  let request = req;
+  let authRequest = request;
 
-  //Attach the access token when one exists.
   if (accessToken) {
-    request = req.clone({
+    authRequest = request.clone({
       setHeaders: {
         Authorization: `Bearer ${accessToken}`,
       },
     });
   }
 
-  return next(request).pipe(
+  return next(authRequest).pipe(
+
     catchError((error: HttpErrorResponse) => {
-      
-      // Only try refresh for 401.
+
+      // Only handle 401.
       if (error.status !== 401) {
         return throwError(() => error);
       }
 
-      // There is no refresh token. The user has to log in again.
       const refreshToken = store.refreshToken();
 
+      // No refresh token means we cannot refresh.
       if (!refreshToken) {
         store.clearAuth();
         router.navigate(['/login']);
@@ -54,17 +74,42 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
         return throwError(() => error);
       }
 
-      // Ask the backend for a new access token and a new refresh token.
-      return authService.refresh(refreshToken).pipe(
-        switchMap((response) => {
-        
-          // Save BOTH new tokens because the backend rotates the refresh token.
-          store.setTokens(response);
+      //If another request is already refreshing, use that same refresh request.
+      if (!refreshInFlight$) {
+        refreshInFlight$ = authService
+          .refresh(refreshToken)
+          .pipe(
 
-          // Retry the original request with the NEW access token.
-          const retryRequest = req.clone({
+            tap((response) => {
+              store.setTokens(response);
+            }),
+
+            catchError((refreshError) => {
+              store.clearAuth();
+              router.navigate(['/login']);
+
+              return throwError(() => refreshError);
+            }),
+
+            finalize(() => {
+              refreshInFlight$ = null;
+            }),
+
+            shareReplay({
+              bufferSize: 1,
+              refCount: false,
+            }),
+          );
+      }
+
+      // Wait for the existing/new refresh request. All requests reaching this point share it.
+      return refreshInFlight$.pipe(
+
+        switchMap((response) => {
+          const retryRequest = request.clone({
             setHeaders: {
-              Authorization: `Bearer ${response.accessToken}`,
+              Authorization:
+                `Bearer ${response.accessToken}`,
             },
           });
 
@@ -72,12 +117,6 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
         }),
 
         catchError((refreshError) => {
-          
-          // Refresh failed. Clear authentication and send the user  to login.
-          store.clearAuth();
-
-          router.navigate(['/login']);
-
           return throwError(() => refreshError);
         }),
       );

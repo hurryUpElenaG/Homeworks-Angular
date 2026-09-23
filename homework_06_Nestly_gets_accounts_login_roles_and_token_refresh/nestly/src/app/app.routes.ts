@@ -23,14 +23,14 @@ export const routes: Routes = [
 
   {
     path: 'host/new',
-    canActivate: [authGuard],
+    canActivate: [authGuard],   //user needs to be logged in to create a new stay
     loadComponent: () =>
       import('./pages/host-new/host-new.component').then((m) => m.HostNewComponent),
   },
 
   {
     path: 'admin',
-    canActivate: [authGuard, adminGuard],
+    canActivate: [authGuard, adminGuard],   //user needs to be logged in, and user needs to be admin to to create a new stay
     loadComponent: () => import('./pages/admin/admin.component').then((m) => m.AdminComponent),
   },
 
